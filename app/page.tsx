@@ -40,28 +40,8 @@ const portfolio = [
 export default function Home() {
   return (
     <main className="overflow-hidden">
-      {/* NAV */}
-      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-bg/70 border-b border-border">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <Link href="/" className="font-display text-xl tracking-tight">
-            SHEGELEE <span className="text-accent">·</span>{" "}
-            <span className="text-muted text-xs tracking-[0.3em] align-middle">MULTIMEDIA</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted">
-            <Link href="/studio" className="hover:text-white transition">Studio</Link>
-            <Link href="/instruments" className="hover:text-white transition">Instruments</Link>
-            <Link href="/events" className="hover:text-white transition">Events</Link>
-            <Link href="/portfolio" className="hover:text-white transition">Portfolio</Link>
-            <Link href="/about" className="hover:text-white transition">About</Link>
-          </div>
-          <Link
-            href="/contact"
-            className="px-4 py-2 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition"
-          >
-            Book now
-          </Link>
-        </div>
-      </nav>
+  
+     
 
       {/* HERO */}
       <section className="relative min-h-screen flex items-center justify-center pt-24">
@@ -201,17 +181,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row justify-between gap-4 text-sm text-muted">
-          <p>© {new Date().getFullYear()} Shegelee Multimedia. Lagos, Nigeria.</p>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-white transition">Instagram</a>
-            <a href="#" className="hover:text-white transition">YouTube</a>
-            <a href="#" className="hover:text-white transition">WhatsApp</a>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }

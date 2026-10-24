@@ -32,12 +32,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen pt-28 pb-24">
       <div className="max-w-6xl mx-auto px-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-muted hover:text-white text-sm mb-8 transition"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back home
-        </Link>
+      
 
         <motion.div initial="hidden" animate="show" variants={fadeUp} className="mb-12">
           <p className="text-accent text-sm tracking-[0.3em] uppercase mb-4">Contact</p>
