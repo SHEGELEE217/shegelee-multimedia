@@ -20,7 +20,7 @@ export default function Footer() {
         <div className="flex gap-6">
           <a href="#" className="hover:text-white transition">Instagram</a>
           <a href="#" className="hover:text-white transition">YouTube</a>
-          <a href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">WhatsApp</a>
+          <a href="https://wa.me/2348140253666" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">WhatsApp</a>
         </div>
       </div>
     </footer>

@@ -13,7 +13,8 @@ const fadeUp = {
 const services = ["Recording session", "Instrument rental", "Event equipment", "Full production", "Other"];
 
 export default function ContactPage() {
-  const [sent, setSent] = useState(false);
+   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false); // New loading state
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -22,11 +23,34 @@ export default function ContactPage() {
     message: "",
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Placeholder: replace with a real API call or Formspree endpoint later.
-    console.log("Form submitted:", form);
-    setSent(true);
+    setLoading(true);
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "a39e485a-f89d-4e12-86dc-6df9024cc9fe", // 👈 Paste your key here!
+          ...form,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setSent(true);
+      } else {
+        alert("Something went wrong. Please try again or reach us on WhatsApp.");
+      }
+    } catch (error) {
+      alert("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -53,14 +77,14 @@ export default function ContactPage() {
                 <li className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-white">+234 800 000 0000</p>
+                    <p className="text-white">+234 814 025 3666</p>
                     <p className="text-muted">Mon–Sat, 9am–7pm</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <Mail className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-white">hello@shegelee.com</p>
+                    <p className="text-white">samwebstudios01@gmail.com</p>
                     <p className="text-muted">We reply within 24 hours</p>
                   </div>
                 </li>
@@ -75,7 +99,7 @@ export default function ContactPage() {
             </div>
 
             <a
-              href="https://wa.me/2348000000000"
+              href="https://wa.me/2348140253666"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-4 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 transition"
@@ -164,11 +188,12 @@ export default function ContactPage() {
                     placeholder="Tell us about your project, dates, and budget..."
                   />
                 </div>
-                <button
+                               <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 transition"
+                  disabled={loading}
+                  className="w-full py-3.5 rounded-xl bg-accent text-white font-medium hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send message
+                  {loading ? "Sending..." : "Send message"}
                 </button>
               </form>
             )}
