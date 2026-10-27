@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Sora, Inter } from "next/font/google";
 import "./globals.css";
-import "tailwindcss/tailwind.css"; // 👈 ADD THIS LINE
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
