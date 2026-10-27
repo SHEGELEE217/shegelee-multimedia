@@ -4,10 +4,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+  experimental: {
+    turbopack: {}, // 👈 This fixes the Tailwind CSS loading issue in Next.js 16
   },
-  output: "standalone", // 👈 Add this line
 };
 
 export default nextConfig;
