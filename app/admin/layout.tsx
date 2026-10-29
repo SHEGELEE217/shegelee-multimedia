@@ -4,19 +4,17 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { LayoutDashboard, Inbox, Guitar, Mic2, Image as ImageIcon, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, Guitar, Mic2, Image as ImageIcon, LogOut, Loader2, Menu, X } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // 👈 New state for mobile menu
   const router = useRouter();
   const pathname = usePathname();
 
-  // Protect the route
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
-      // If no session and not on the login page, redirect to login
       if (!session && pathname !== "/admin/login") {
         router.push("/admin/login");
       } else {
@@ -31,7 +29,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/admin/login");
   };
 
-  // Don't show the sidebar on the login page
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
@@ -53,14 +50,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex bg-bg text-white">
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <aside className="w-64 border-r border-border bg-surface hidden md:flex flex-col">
         <div className="p-6 border-b border-border">
           <Link href="/" className="font-display text-lg tracking-tight">
             SHEGELEE <span className="text-accent">Admin</span>
           </Link>
         </div>
-
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -69,9 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 key={item.name}
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm ${
-                  isActive
-                    ? "bg-accent/10 text-accent font-medium"
-                    : "text-muted hover:text-white hover:bg-bg"
+                  isActive ? "bg-accent/10 text-accent font-medium" : "text-muted hover:text-white hover:bg-bg"
                 }`}
               >
                 <item.icon className="w-4 h-4" />
@@ -80,26 +74,49 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
-
         <div className="p-4 border-t border-border">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-red-500/10 transition text-sm"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
+          <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-red-500/10 transition text-sm">
+            <LogOut className="w-4 h-4" /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
-        {/* Mobile Header */}
-        <header className="md:hidden p-4 border-b border-border flex items-center justify-between bg-surface">
-          <span className="font-display">SHEGELEE Admin</span>
-          <button onClick={handleLogout} className="text-red-400">
-            <LogOut className="w-5 h-5" />
-          </button>
+        
+        {/* Mobile Header & Menu */}
+        <header className="md:hidden p-4 border-b border-border bg-surface sticky top-0 z-50">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-lg">SHEGELEE <span className="text-accent">Admin</span></span>
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-white">
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+          
+          {/* Mobile Dropdown Menu */}
+          {mobileMenuOpen && (
+            <nav className="mt-4 space-y-2 pb-4">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm ${
+                      isActive ? "bg-accent/10 text-accent font-medium" : "text-muted hover:text-white hover:bg-bg"
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+              <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-red-500/10 transition text-sm mt-2">
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+            </nav>
+          )}
         </header>
         
         <div className="p-6 md:p-10 max-w-6xl mx-auto w-full">
