@@ -1,46 +1,38 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Users, Music2, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Users, Music2 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
-const rooms = [
-  {
-    name: "The Live Room",
-    tag: "Recording · Full band",
-    price: "₦45,000 / hr",
-    capacity: "Up to 8 people",
-    gear: "Neumann mics, SSL console, drum kit, 2 guitar amps, grand piano",
-    img: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&q=80",
-  },
-  {
-    name: "Vocal Booth A",
-    tag: "Recording · Vocals",
-    price: "₦20,000 / hr",
-    capacity: "Up to 3 people",
-    gear: "Neumann U87, Avalon preamp, Pro Tools HD, monitoring headphones",
-    img: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1200&q=80",
-  },
-  {
-    name: "Mixing Suite",
-    tag: "Mixing · Mastering",
-    price: "₦35,000 / hr",
-    capacity: "Up to 4 people",
-    gear: "Genelec monitors, UAD plugins, outboard compressors, Pro Tools + Logic",
-    img: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=1200&q=80",
-  },
-];
-
 export default function StudioPage() {
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const { data } = await supabase.from("studios").select("*");
+      if (data) setRooms(data);
+      setLoading(false);
+    };
+    fetchRooms();
+  }, []);
+
   return (
     <main className="min-h-screen pt-28 pb-24">
       <div className="max-w-7xl mx-auto px-6">
-
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted hover:text-white text-sm mb-8 transition"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back home
+        </Link>
 
         <motion.div initial="hidden" animate="show" variants={fadeUp} className="mb-14">
           <p className="text-accent text-sm tracking-[0.3em] uppercase mb-4">Recording Studio</p>
@@ -53,10 +45,12 @@ export default function StudioPage() {
           </p>
         </motion.div>
 
+        {loading && <p className="text-muted text-center py-10">Loading rooms...</p>}
+
         <div className="grid gap-6">
           {rooms.map((room, i) => (
             <motion.div
-              key={room.name}
+              key={room.id}
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
@@ -66,7 +60,7 @@ export default function StudioPage() {
             >
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
                 <img
-                  src={room.img}
+                  src={room.image_url}
                   alt={room.name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />

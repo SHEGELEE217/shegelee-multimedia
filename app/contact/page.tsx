@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Phone, MapPin, MessageCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -23,11 +24,32 @@ export default function ContactPage() {
     message: "",
   });
 
-  async function handleSubmit(e: React.FormEvent) {
+   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // 1. Save to Supabase Database (for the Admin Dashboard)
+      const { error: dbError } = await supabase
+        .from("inquiries")
+        .insert([
+          {
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            service: form.service,
+            message: form.message,
+          },
+        ]);
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        alert("Database error: Could not save your message.");
+        setLoading(false);
+        return;
+      }
+
+      // 2. Send the Email via Web3Forms (for your inbox)
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: {
@@ -35,16 +57,18 @@ export default function ContactPage() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: "a39e485a-f89d-4e12-86dc-6df9024cc9fe", // 👈 Paste your key here!
+          access_key: "a39e485a-f89d-4e12-86dc-6df9024cc9fe", // Keep your real key here!
           ...form,
         }),
       });
 
       const result = await response.json();
+      
       if (result.success) {
         setSent(true);
       } else {
-        alert("Something went wrong. Please try again or reach us on WhatsApp.");
+        alert("Message saved to database, but email notification failed.");
+        setSent(true); // Still show success because the DB saved it
       }
     } catch (error) {
       alert("Network error. Please check your connection.");

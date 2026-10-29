@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, MapPin, Calendar } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -11,83 +12,33 @@ const fadeUp = {
 };
 
 type Filter = "All" | "Concerts" | "Weddings" | "Corporate" | "Studio";
-
-const projects = [
-  {
-    title: "Lagos Live Sessions",
-    category: "Concerts" as Filter,
-    location: "Eko Hotel, Lagos",
-    date: "Mar 2025",
-    scope: "Stage, line-array sound, 24 moving heads, LED backdrop",
-    img: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1200&q=80",
-  },
-  {
-    title: "The Amaka Wedding",
-    category: "Weddings" as Filter,
-    location: "Ikoyi, Lagos",
-    date: "Feb 2025",
-    scope: "Elegant stage, warm lighting, 4 wireless mics, column PA",
-    img: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80",
-  },
-  {
-    title: "TechCo Product Launch",
-    category: "Corporate" as Filter,
-    location: "Victoria Island, Lagos",
-    date: "Jan 2025",
-    scope: "Podium build, LED presentation screen, stage wash lighting",
-    img: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80",
-  },
-  {
-    title: "Album Recording — Vol. 1",
-    category: "Studio" as Filter,
-    location: "Shegelee Studio, Lagos",
-    date: "Dec 2024",
-    scope: "Full band live tracking, mixing, and mastering",
-    img: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&q=80",
-  },
-  {
-    title: "Rooftop Sound Experience",
-    category: "Concerts" as Filter,
-    location: "Lekki, Lagos",
-    date: "Nov 2024",
-    scope: "Rooftop stage, compact line array, ambient lighting",
-    img: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=1200&q=80",
-  },
-  {
-    title: "Corporate Gala Night",
-    category: "Corporate" as Filter,
-    location: "Ikeja, Lagos",
-    date: "Oct 2024",
-    scope: "Stage build, conference PA, projection screens, lighting",
-    img: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200&q=80",
-  },
-  {
-    title: "Vocal Sessions — Single",
-    category: "Studio" as Filter,
-    location: "Shegelee Studio, Lagos",
-    date: "Sep 2024",
-    scope: "Vocal recording, comping, tuning, and mix",
-    img: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1200&q=80",
-  },
-  {
-    title: "Outdoor Wedding Stage",
-    category: "Weddings" as Filter,
-    location: "Ajah, Lagos",
-    date: "Aug 2024",
-    scope: "Outdoor stage, weatherproof rig, lighting, sound",
-    img: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1200&q=80",
-  },
-];
-
 const filters: Filter[] = ["All", "Concerts", "Weddings", "Corporate", "Studio"];
 
 export default function PortfolioPage() {
   const [active, setActive] = useState<Filter>("All");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const { data } = await supabase.from("portfolio").select("*");
+      if (data) setProjects(data);
+      setLoading(false);
+    };
+    fetchProjects();
+  }, []);
+
   const filtered = active === "All" ? projects : projects.filter((p) => p.category === active);
 
   return (
     <main className="min-h-screen pt-28 pb-24">
       <div className="max-w-7xl mx-auto px-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted hover:text-white text-sm mb-8 transition"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back home
+        </Link>
 
         <motion.div initial="hidden" animate="show" variants={fadeUp} className="mb-10">
           <p className="text-accent text-sm tracking-[0.3em] uppercase mb-4">Portfolio</p>
@@ -100,7 +51,6 @@ export default function PortfolioPage() {
           </p>
         </motion.div>
 
-        {/* Filters */}
         <div className="flex flex-wrap gap-2 mb-10">
           {filters.map((f) => (
             <button
@@ -117,12 +67,13 @@ export default function PortfolioPage() {
           ))}
         </div>
 
-        {/* Grid */}
+        {loading && <p className="text-muted text-center py-10">Loading portfolio...</p>}
+
         <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((p, i) => (
               <motion.article
-                key={p.title}
+                key={p.id}
                 layout
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -132,7 +83,7 @@ export default function PortfolioPage() {
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
-                    src={p.img}
+                    src={p.image_url}
                     alt={p.title}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
@@ -147,7 +98,7 @@ export default function PortfolioPage() {
                       <MapPin className="w-3.5 h-3.5 text-accent" /> {p.location}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-accent" /> {p.date}
+                      <Calendar className="w-3.5 h-3.5 text-accent" /> {p.event_date}
                     </span>
                   </div>
                   <p className="text-muted text-sm leading-relaxed">{p.scope}</p>

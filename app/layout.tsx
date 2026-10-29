@@ -1,25 +1,28 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Sora, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { usePathname } from "next/navigation";
 
 const sora = Sora({ subsets: ["latin"], variable: "--font-sora" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-export const metadata: Metadata = {
-  title: "Shegelee Multimedia — Sound. Stage. Story.",
-  description:
-    "Premium recording studio, musical instrument rentals, and stage, lighting & screen rentals for events. Based in Lagos, Nigeria.",
-};
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
+
   return (
     <html lang="en" className={`${sora.variable} ${inter.variable}`}>
       <body className="font-sans bg-bg text-white">
-        <Navbar />
+        {/* Only show Navbar if NOT on an admin page */}
+        {!isAdmin && <Navbar />}
+        
         {children}
-        <Footer />
+        
+        {/* Only show Footer if NOT on an admin page */}
+        {!isAdmin && <Footer />}
       </body>
     </html>
   );

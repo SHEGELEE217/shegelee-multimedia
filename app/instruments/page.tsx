@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Search, Tag, Package } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -11,71 +12,23 @@ const fadeUp = {
 };
 
 type Category = "All" | "Guitars" | "Keyboards" | "Drums" | "Sound";
-
-const instruments = [
-  {
-    name: "Fender Stratocaster",
-    category: "Guitars" as Category,
-    price: "₦15,000 / day",
-    deposit: "₦50,000 deposit",
-    img: "https://images.unsplash.com/photo-1516924962500-2b4b3b99ea02?w=800&q=80",
-  },
-  {
-    name: "Gibson Les Paul",
-    category: "Guitars" as Category,
-    price: "₦20,000 / day",
-    deposit: "₦80,000 deposit",
-    img: "https://images.unsplash.com/photo-1550985616-10810253b84d?w=800&q=80",
-  },
-  {
-    name: "Yamaha Motif XF",
-    category: "Keyboards" as Category,
-    price: "₦25,000 / day",
-    deposit: "₦100,000 deposit",
-    img: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=800&q=80",
-  },
-  {
-    name: "Roland RD-2000",
-    category: "Keyboards" as Category,
-    price: "₦22,000 / day",
-    deposit: "₦90,000 deposit",
-    img: "https://images.unsplash.com/photo-1571974599782-87624638275e?w=800&q=80",
-  },
-  {
-    name: "Pearl Export Kit",
-    category: "Drums" as Category,
-    price: "₦30,000 / day",
-    deposit: "₦120,000 deposit",
-    img: "https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=800&q=80",
-  },
-  {
-    name: "Roland TD-27 V-Drums",
-    category: "Drums" as Category,
-    price: "₦28,000 / day",
-    deposit: "₦110,000 deposit",
-    img: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=80",
-  },
-  {
-    name: "JBL SRX828 Subwoofer",
-    category: "Sound" as Category,
-    price: "₦18,000 / day",
-    deposit: "₦70,000 deposit",
-    img: "https://images.unsplash.com/photo-1545128485-c400e7702796?w=800&q=80",
-  },
-  {
-    name: "Shure SM58 Pack (x4)",
-    category: "Sound" as Category,
-    price: "₦8,000 / day",
-    deposit: "₦25,000 deposit",
-    img: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&q=80",
-  },
-];
-
 const categories: Category[] = ["All", "Guitars", "Keyboards", "Drums", "Sound"];
 
 export default function InstrumentsPage() {
   const [active, setActive] = useState<Category>("All");
   const [query, setQuery] = useState("");
+  
+  const [instruments, setInstruments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGear = async () => {
+      const { data } = await supabase.from("instruments").select("*");
+      if (data) setInstruments(data);
+      setLoading(false);
+    };
+    fetchGear();
+  }, []);
 
   const filtered = useMemo(() => {
     return instruments.filter((i) => {
@@ -83,11 +36,17 @@ export default function InstrumentsPage() {
       const matchesQuery = i.name.toLowerCase().includes(query.toLowerCase());
       return matchesCategory && matchesQuery;
     });
-  }, [active, query]);
+  }, [active, query, instruments]);
 
   return (
     <main className="min-h-screen pt-28 pb-24">
       <div className="max-w-7xl mx-auto px-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted hover:text-white text-sm mb-8 transition"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back home
+        </Link>
 
         <motion.div initial="hidden" animate="show" variants={fadeUp} className="mb-10">
           <p className="text-accent text-sm tracking-[0.3em] uppercase mb-4">Instrument Rentals</p>
@@ -100,7 +59,6 @@ export default function InstrumentsPage() {
           </p>
         </motion.div>
 
-        {/* Filters */}
         <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-8">
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => (
@@ -128,12 +86,13 @@ export default function InstrumentsPage() {
           </div>
         </div>
 
-        {/* Grid */}
+        {loading && <p className="text-muted text-center py-10">Loading gear...</p>}
+
         <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {filtered.map((item, i) => (
               <motion.div
-                key={item.name}
+                key={item.id}
                 layout
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -143,7 +102,7 @@ export default function InstrumentsPage() {
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
-                    src={item.img}
+                    src={item.image_url}
                     alt={item.name}
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
@@ -173,7 +132,7 @@ export default function InstrumentsPage() {
           </AnimatePresence>
         </motion.div>
 
-        {filtered.length === 0 && (
+        {filtered.length === 0 && !loading && (
           <p className="text-muted text-center py-16">No gear matches that filter. Try another category.</p>
         )}
 
